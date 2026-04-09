@@ -1,8 +1,8 @@
-.DS_Store
+.git
+.github
 .theos
 build
 output
 packages
 *.deb
 *.ipa
-/socket.xcodeproj/xcuserdata

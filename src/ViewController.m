@@ -6,8 +6,8 @@
 //
 
 #import "ViewController.h"
-#include "../jailbreak.h"
-#include "../util.h"
+#include "jailbreak.h"
+#include "util.h"
 
 #include <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>

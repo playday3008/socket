@@ -1,0 +1,59 @@
+name: Build
+
+on:
+  push:
+    branches: [master, main, ci/**, build/**]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      THEOS: /opt/theos
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Theos
+        run: |
+          sudo mkdir -p $THEOS && sudo chown $USER $THEOS
+          CI=1 bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+          rm -rf $THEOS/sdks/*.sdk
+          $THEOS/bin/install-sdk iPhoneOS10.3
+
+      - name: Patch SDK stubs
+        run: |
+          # Strip simulator archs from top-level TBD fields (theos/sdks#56)
+          find $THEOS/sdks/iPhoneOS10.3.sdk -type f -name '*.tbd' -exec sed -i '' \
+              -e '/^archs:/s/, x86_64//g' \
+              -e '/^archs:/s/x86_64, //g' \
+              -e '/^archs:/s/, i386//g' \
+              -e '/^archs:/s/i386, //g' {} +
+          # Add standard C symbols missing from libsystem_c stubs
+          sed -i '' '/symbols:.*\[.*_OSMemoryNotificationCurrentLevel/s/\[/[ _memcmp, _memcpy, _memmove, _memset, _memset_pattern16, _strcmp, _strncmp, _strlen, _strncpy, _strlcpy, _strlcat, _bzero, /' \
+              $THEOS/sdks/iPhoneOS10.3.sdk/usr/lib/system/libsystem_c.tbd
+          # Remove module maps — newer Clang can't build modules from the
+          # old SDK, and Theos forces -fmodules after our -fno-modules.
+          find $THEOS/sdks/iPhoneOS10.3.sdk -name 'module.map' -delete
+          find $THEOS/sdks/iPhoneOS10.3.sdk -name 'module.modulemap' -delete
+
+      - name: Build package
+        run: make package FINALPACKAGE=1
+
+      - name: Upload .deb artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: deb-package
+          path: packages/*.deb
+
+      - name: Build .ipa
+        run: |
+          mkdir -p Payload
+          cp -R .theos/_/Applications/socket.app Payload/
+          zip -r socket.ipa Payload
+          rm -rf Payload
+
+      - name: Upload .ipa artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ipa-package
+          path: socket.ipa

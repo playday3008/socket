@@ -1,0 +1,9 @@
+Package: com.staturnz.socket
+Name: socket
+Depends: firmware (>= 10.0), firmware (<= 10.3.4)
+Version: 1.2
+Architecture: iphoneos-arm
+Description: iOS 10.x jailbreak for 32-bit devices.
+Maintainer: staturnz
+Author: staturnz
+Section: Utilities

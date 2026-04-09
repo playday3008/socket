@@ -19,8 +19,8 @@
 #include <sys/utsname.h>
 #include <sys/mount.h>
 #include <spawn.h>
-#include <sys/dir.h>
-#include <sys/dirent.h>
+#include <dirent.h>
+#include <mach-o/dyld.h>
 #include <libgen.h>
 #include <glob.h>
 #include <fnmatch.h>

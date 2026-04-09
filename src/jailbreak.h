@@ -14,6 +14,9 @@
 #include <mach-o/fat.h>
 #include <Foundation/Foundation.h>
 
+int run_jailbreak(uint32_t flags);
+void print_log(const char *fmt, ...);
+
 #define JB_FLAG_NONE        0x00000000
 #define JB_FLAG_BOOTSTRAP   0x00000001
 #define JB_FLAG_TWEAKS      0x00000002
